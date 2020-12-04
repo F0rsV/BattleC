@@ -1,9 +1,9 @@
-﻿using BattleSea.Builder.Enums;
-using BattleSea.Builder.Interfaces;
-using BattleSea.Exceptions;
-using BattleSea.Model;
+﻿using Logic.Exceptions;
+using Logic.GameField.Builder.Interfaces;
+using Logic.Utils;
+using Logic.Utils.Enums;
 
-namespace BattleSea.Builder
+namespace Logic.GameField.Builder
 {
     public class FieldBuilder : IFieldBuilder
     {
@@ -229,6 +229,5 @@ namespace BattleSea.Builder
             }
 
         }
-
     }
 }

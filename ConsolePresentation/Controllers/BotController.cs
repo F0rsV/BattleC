@@ -1,39 +1,26 @@
 ﻿using System;
-using BattleSea.Builder;
-using BattleSea.Builder.Interfaces;
-using BattleSea.FactoryMethod;
-using BattleSea.GameControl.Enums;
-using BattleSea.Model;
-using BattleSea.Observer.Interfaces;
-using BattleSea.Strategy.Interfaces;
-using BattleSea.View;
+using ConsolePresentation.View.Interfaces;
+using Logic.GameField;
+using Logic.GameField.Builder;
+using Logic.GameField.Builder.Interfaces;
+using Logic.Strategies.Creators;
+using Logic.Strategies.Interfaces;
+using Logic.Utils;
 
-namespace BattleSea.GameControl.Controllers
+namespace ConsolePresentation.Controllers
 {
-    public class PlayerController : GeneralController
+    public class BotController : GeneralController
     {
-
         public override IShootStrategy GetShootStrategy()
         {
-            StrategyCreator strategyCreator = null;
-
-            var playerInputStrategy = View.GetStrategyInput(); //TODO
-            if (playerInputStrategy == PlayerInputStrategy.Random)
-            {
-                strategyCreator = new ShootStrategyRandomCreator();
-            }
-            else if (playerInputStrategy == PlayerInputStrategy.AtPoint)
-            {
-                strategyCreator = new ShootStrategyAtPointCreator(View.GetPointInput());
-            }
-
-            return strategyCreator?.FactoryMethod();
+            StrategyCreator strategyCreator = new ShootStrategyRandomCreator();
+            return strategyCreator.FactoryMethod();
         }
 
         public override Field GetPlayerField(GameRules gameRules)
         {
             IFieldBuilder fieldBuilder = new FieldBuilder();
-            
+
             fieldBuilder.SetDimension(gameRules.FieldHeight, gameRules.FieldWidth);
             fieldBuilder.SetShipsStorage(gameRules.ShipsStorage);
 
@@ -76,6 +63,6 @@ namespace BattleSea.GameControl.Controllers
         }
 
 
-        public PlayerController(IView view = null) : base(view) { }
+        public BotController(IView view = null) : base(view) { }
     }
 }

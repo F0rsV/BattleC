@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using BattleSea.Builder;
-using BattleSea.Builder.Enums;
-using BattleSea.Builder.Interfaces;
-using BattleSea.FactoryMethod;
-using BattleSea.GameControl.Enums;
-using BattleSea.Model;
-using BattleSea.Observer;
-using BattleSea.Observer.Interfaces;
-using BattleSea.Strategy.Interfaces;
+using ConsolePresentation.Utils.Enums;
+using ConsolePresentation.View.Interfaces;
+using Logic.EventsManager.Interfaces;
+using Logic.Utils;
+using Logic.Utils.Enums;
 
-namespace BattleSea.View
+namespace ConsolePresentation.View
 {
     public class ConsoleView : IView
     {

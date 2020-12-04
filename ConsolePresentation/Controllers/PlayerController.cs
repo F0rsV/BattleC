@@ -1,18 +1,17 @@
 ﻿using System;
-using BattleSea.Builder;
-using BattleSea.Builder.Interfaces;
-using BattleSea.FactoryMethod;
-using BattleSea.GameControl.Enums;
-using BattleSea.Model;
-using BattleSea.Observer.Interfaces;
-using BattleSea.Strategy.Interfaces;
-using BattleSea.View;
+using ConsolePresentation.Utils.Enums;
+using ConsolePresentation.View.Interfaces;
+using Logic.GameField;
+using Logic.GameField.Builder;
+using Logic.GameField.Builder.Interfaces;
+using Logic.Strategies.Creators;
+using Logic.Strategies.Interfaces;
+using Logic.Utils;
 
-namespace BattleSea.GameControl.Controllers
+namespace ConsolePresentation.Controllers
 {
     public class PlayerController : GeneralController
     {
-
         public override IShootStrategy GetShootStrategy()
         {
             StrategyCreator strategyCreator = null;
@@ -33,7 +32,7 @@ namespace BattleSea.GameControl.Controllers
         public override Field GetPlayerField(GameRules gameRules)
         {
             IFieldBuilder fieldBuilder = new FieldBuilder();
-            
+
             fieldBuilder.SetDimension(gameRules.FieldHeight, gameRules.FieldWidth);
             fieldBuilder.SetShipsStorage(gameRules.ShipsStorage);
 

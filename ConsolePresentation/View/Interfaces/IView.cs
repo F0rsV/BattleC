@@ -1,10 +1,9 @@
-﻿using BattleSea.Builder;
-using BattleSea.Builder.Enums;
-using BattleSea.GameControl.Enums;
-using BattleSea.Model;
-using BattleSea.Observer.Interfaces;
+﻿using ConsolePresentation.Utils.Enums;
+using Logic.EventsManager.Interfaces;
+using Logic.Utils;
+using Logic.Utils.Enums;
 
-namespace BattleSea.View
+namespace ConsolePresentation.View.Interfaces
 {
     public interface IView
     {
