@@ -1,4 +1,5 @@
-﻿using Logic.Exceptions;
+﻿using System;
+using Logic.Exceptions;
 using Logic.GameField.Builder.Interfaces;
 using Logic.Utils;
 using Logic.Utils.Enums;
@@ -24,6 +25,8 @@ namespace Logic.GameField.Builder
 
         public void SetDimension(int height, int width)
         {
+            //TODO exception handle
+
             _field = new Field(height, width);
         }
 

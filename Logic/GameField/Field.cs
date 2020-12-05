@@ -1,4 +1,5 @@
-﻿using Logic.Utils;
+﻿using Logic.Exceptions;
+using Logic.Utils;
 
 namespace Logic.GameField
 {
@@ -10,6 +11,11 @@ namespace Logic.GameField
 
         public Field(int height, int width)
         {
+            if (height <= 0 || width <= 0)
+            {
+                throw new FieldBuilderNegativeOrZeroException();
+            }
+
             CellsMatrix = new Cell[height, width];
 
             for (var i = 0; i < height; i++)
