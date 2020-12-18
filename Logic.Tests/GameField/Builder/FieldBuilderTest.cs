@@ -11,14 +11,21 @@ namespace Logic.Tests.GameField.Builder
     [TestFixture]
     public class FieldBuilderTest
     {
+        private FieldBuilder _builder;
+
+        [SetUp]
+        public void Init()
+        {
+            _builder = new FieldBuilder();
+        }
+
+
         [Test]
         public void Reset_FieldIsNewInstance()
         {
-            var builder = new FieldBuilder();
-
-            var oldField = builder.GetResult();
-            builder.Reset();
-            var newField = builder.GetResult();
+            var oldField = _builder.GetResult();
+            _builder.Reset();
+            var newField = _builder.GetResult();
 
             Assert.AreNotSame(oldField, newField);
         }
@@ -31,9 +38,7 @@ namespace Logic.Tests.GameField.Builder
         [TestCase(4, 0)]
         public void SetSetDimension_NegativeOrZero_ThrowsFieldBuilderNegativeOrZeroException(int height, int width)
         {
-            var builder = new FieldBuilder();
-            
-            void Action() => builder.SetDimension(height, width);
+            void Action() => _builder.SetDimension(height, width);
             
             Assert.Throws<FieldBuilderNegativeOrZeroException>(Action);
         }
@@ -46,9 +51,8 @@ namespace Logic.Tests.GameField.Builder
             var shipStorage = new ShipsStorage();
             shipStorage.AddShip(shipType, 1);
 
-            var builder = new FieldBuilder();
-            builder.SetDimension(5, 5);
-            builder.SetShipsStorage(shipStorage);
+            _builder.SetDimension(5, 5);
+            _builder.SetShipsStorage(shipStorage);
 
             var shipPlacementInfo = new ShipPlacementInfo
             {
@@ -58,10 +62,112 @@ namespace Logic.Tests.GameField.Builder
             };
 
 
-            builder.AddShip(shipPlacementInfo);
+            _builder.AddShip(shipPlacementInfo);
 
+            var listOfCells = GetListOfCellsWhereShipShouldBe(shipPlacementInfo);
+            foreach (var cell in listOfCells)
+            {
+                Assert.True(cell.CellState == CellState.Ship);
+            }
+
+        }
+
+
+
+        [TestCase(2, 2, ShipRotation.Horizontal, ShipType.TwoDecks)]
+        [TestCase(2, 1, ShipRotation.Vertical, ShipType.ThreeDecks)]
+        public void AddShip_SurroundShipWithClosedCells(int pointX, int pointY, ShipRotation shipRotation, ShipType shipType)
+        {
+            var shipStorage = new ShipsStorage();
+            shipStorage.AddShip(shipType, 1);
+
+            _builder.SetDimension(5, 5);
+            _builder.SetShipsStorage(shipStorage);
+
+            var shipPlacementInfo = new ShipPlacementInfo
+            {
+                Point = new Point(pointX, pointY),
+                ShipRotation = shipRotation,
+                ShipType = shipType
+            };
+
+
+            _builder.AddShip(shipPlacementInfo);
+
+            var listOfCells = GetListOfCellsAroundShip(shipPlacementInfo);
+
+            foreach (var cell in listOfCells)
+            {
+                Assert.False(cell.CanPlaceShip);
+            }
+
+        }
+
+
+        [TestCase(4, 0, ShipRotation.Horizontal)]
+        [TestCase(0, 3, ShipRotation.Vertical)]
+        public void AddShip_ThrowsShipPlacementOutOfBoundsException(int pointX, int pointY, ShipRotation shipRotation)
+        {
+            var shipStorage = new ShipsStorage();
+            shipStorage.AddShip(ShipType.FourDecks, 1);
+
+            
+            _builder.SetDimension(5, 5);
+            _builder.SetShipsStorage(shipStorage);
+
+            var shipPlacementInfo = new ShipPlacementInfo
+            {
+                Point = new Point(pointX, pointY), 
+                ShipRotation = shipRotation, 
+                ShipType = ShipType.FourDecks
+            };
+
+
+            void Action() => _builder.AddShip(shipPlacementInfo);
+
+
+            Assert.Throws<ShipPlacementOutOfBoundsException>(Action);
+        }
+
+
+        [TestCase(0, 3, ShipRotation.Horizontal)]
+        [TestCase(4, 0, ShipRotation.Vertical)]
+        public void AddShip_ThrowsShipPlacementCollisionException(int pointX, int pointY, ShipRotation shipRotation)
+        {
+            var shipStorage = new ShipsStorage();
+            shipStorage.AddShip(ShipType.FourDecks, 1);
+            shipStorage.AddShip(ShipType.TwoDecks, 1);
+
+            _builder.SetDimension(5, 5);
+            _builder.SetShipsStorage(shipStorage);
+
+            var shipPlacementInfoFirst = new ShipPlacementInfo
+            {
+                Point = new Point(3, 3),
+                ShipRotation = ShipRotation.Horizontal,
+                ShipType = ShipType.TwoDecks
+            };
+            _builder.AddShip(shipPlacementInfoFirst);
+
+            var shipPlacementInfoSecond = new ShipPlacementInfo
+            {
+                Point = new Point(pointX, pointY),
+                ShipRotation = shipRotation,
+                ShipType = ShipType.FourDecks
+            };
+
+
+            void Action() => _builder.AddShip(shipPlacementInfoSecond);
+
+
+            Assert.Throws<ShipPlacementCollisionException>(Action);
+        }
+
+
+        private List<Cell> GetListOfCellsWhereShipShouldBe(ShipPlacementInfo shipPlacementInfo)
+        {
             var listOfCells = new List<Cell>();
-            var filed = builder.GetResult();
+            var filed = _builder.GetResult();
 
             int x = shipPlacementInfo.Point.X;
             int y = shipPlacementInfo.Point.Y;
@@ -86,42 +192,14 @@ namespace Logic.Tests.GameField.Builder
                     y++;
             }
 
-            ;
-            foreach (var cell in listOfCells)
-            {
-                bool cellHasShip = (cell.CellState == CellState.Ship);
-                Assert.True(cellHasShip);
-            }
 
+            return listOfCells;
         }
 
-
-
-        [TestCase(2, 2, ShipRotation.Horizontal, ShipType.TwoDecks)]
-        [TestCase(2, 1, ShipRotation.Vertical, ShipType.ThreeDecks)]
-        public void AddShip_SurroundShipWithClosedCells(int pointX, int pointY, ShipRotation shipRotation, ShipType shipType)
+        private List<Cell> GetListOfCellsAroundShip(ShipPlacementInfo shipPlacementInfo)
         {
-            var shipStorage = new ShipsStorage();
-            shipStorage.AddShip(shipType, 1);
-
-            var builder = new FieldBuilder();
-            builder.SetDimension(5, 5);
-            builder.SetShipsStorage(shipStorage);
-
-            var shipPlacementInfo = new ShipPlacementInfo
-            {
-                Point = new Point(pointX, pointY),
-                ShipRotation = shipRotation,
-                ShipType = shipType
-            };
-
-
-            builder.AddShip(shipPlacementInfo);
-
-            ;
-
             var listOfCells = new List<Cell>();
-            var filed = builder.GetResult();
+            var filed = _builder.GetResult();
 
             int x = shipPlacementInfo.Point.X;
             int y = shipPlacementInfo.Point.Y;
@@ -142,6 +220,7 @@ namespace Logic.Tests.GameField.Builder
                     listOfCells.Add(filed.CellsMatrix[yIndexBefore, x - 1]);
                 }
             }
+
 
             //main iteration
             for (int i = 0; i < iterations; i++)
@@ -180,78 +259,8 @@ namespace Logic.Tests.GameField.Builder
                 }
             }
 
-            
-
-            foreach (var cell in listOfCells)
-            {
-                Assert.False(cell.CanPlaceShip);
-            }
-
+            return listOfCells;
         }
-
-
-        [TestCase(4, 0, ShipRotation.Horizontal)]
-        [TestCase(0, 3, ShipRotation.Vertical)]
-        public void AddShip_ThrowsShipPlacementOutOfBoundsException(int pointX, int pointY, ShipRotation shipRotation)
-        {
-            var shipStorage = new ShipsStorage();
-            shipStorage.AddShip(ShipType.FourDecks, 1);
-
-            var builder = new FieldBuilder();
-            builder.SetDimension(5, 5);
-            builder.SetShipsStorage(shipStorage);
-
-            var shipPlacementInfo = new ShipPlacementInfo
-            {
-                Point = new Point(pointX, pointY), 
-                ShipRotation = shipRotation, 
-                ShipType = ShipType.FourDecks
-            };
-
-
-            void Action() => builder.AddShip(shipPlacementInfo);
-
-
-            Assert.Throws<ShipPlacementOutOfBoundsException>(Action);
-        }
-
-
-        [TestCase(0, 3, ShipRotation.Horizontal)]
-        [TestCase(4, 0, ShipRotation.Vertical)]
-        public void AddShip_ThrowsShipPlacementCollisionException(int pointX, int pointY, ShipRotation shipRotation)
-        {
-            var shipStorage = new ShipsStorage();
-            shipStorage.AddShip(ShipType.FourDecks, 1);
-            shipStorage.AddShip(ShipType.TwoDecks, 1);
-
-            var builder = new FieldBuilder();
-            builder.SetDimension(5, 5);
-            builder.SetShipsStorage(shipStorage);
-
-            var shipPlacementInfoFirst = new ShipPlacementInfo
-            {
-                Point = new Point(3, 3),
-                ShipRotation = ShipRotation.Horizontal,
-                ShipType = ShipType.TwoDecks
-            };
-            builder.AddShip(shipPlacementInfoFirst);
-
-            var shipPlacementInfoSecond = new ShipPlacementInfo
-            {
-                Point = new Point(pointX, pointY),
-                ShipRotation = shipRotation,
-                ShipType = ShipType.FourDecks
-            };
-
-
-            void Action() => builder.AddShip(shipPlacementInfoSecond);
-
-
-            Assert.Throws<ShipPlacementCollisionException>(Action);
-        }
-
-
-        
 
 
     }

@@ -14,17 +14,13 @@ namespace ConsolePresentation.Controllers
     {
         public override IShootStrategy GetShootStrategy()
         {
-            StrategyCreator strategyCreator = null;
-
-            var playerInputStrategy = View.GetStrategyInput(); //TODO
-            if (playerInputStrategy == PlayerInputStrategy.Random)
+            var playerInputStrategy = View.GetStrategyInput();
+            StrategyCreator strategyCreator = playerInputStrategy switch
             {
-                strategyCreator = new ShootStrategyRandomCreator();
-            }
-            else if (playerInputStrategy == PlayerInputStrategy.AtPoint)
-            {
-                strategyCreator = new ShootStrategyAtPointCreator(View.GetPointInput());
-            }
+                PlayerInputStrategy.Random => new ShootStrategyRandomCreator(),
+                PlayerInputStrategy.AtPoint => new ShootStrategyAtPointCreator(View.GetPointInput()),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             return strategyCreator?.FactoryMethod();
         }
